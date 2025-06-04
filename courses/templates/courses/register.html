@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+</head>
+<body>
+<!-- templates/courses/register.html -->
+<h2>用户注册</h2>
+<form method="post">
+    {% csrf_token %}
+    用户名：<input type="text" name="username"><br>
+    密码：<input type="password" name="password"><br>
+    <input type="submit" value="注册">
+</form>
+<p>已有账号？<a href="{% url 'login' %}">去登录</a></p>
+
+</body>
+</html>
