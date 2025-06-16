@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>我的课程</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .course-item {
+            border-left: 4px solid #0d6efd;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h2 class="text-center">我的已选课程</h2>
+            </div>
+        </div>
+
+        {% if enrollments %}
+        <div class="list-group">
+            {% for enrollment in enrollments %}
+            <div class="list-group-item course-item mb-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>{{ enrollment.course.name }}</h5>
+                        <p class="mb-0 text-muted">授课教师: {{ enrollment.course.teacher }}</p>
+                    </div>
+                    <a href="{% url 'drop_course' enrollment.course.id %}" class="btn btn-sm btn-outline-danger">退课</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            你还没有选任何课程。
+        </div>
+        {% endif %}
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'course_list' %}" class="btn btn-primary">返回所有课程</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
