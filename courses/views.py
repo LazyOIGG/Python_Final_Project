@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -8,7 +9,7 @@ from django.shortcuts import get_object_or_404
 
 @login_required
 def course_list(request):
-    courses = Course.objects.all()
+    courses = Course.objects.all().annotate(enrollment_count=Count('enrollment'))
     enrolled_courses = Enrollment.objects.filter(student=request.user).values_list('course_id', flat=True)
     return render(request, 'courses/course_list.html', {
         'courses': courses,

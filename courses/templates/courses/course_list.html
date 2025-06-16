@@ -15,6 +15,16 @@
         .enrolled-badge {
             background-color: #28a745;
         }
+        #enrollmentChart {
+            margin: 30px auto;
+            max-height: 400px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -25,6 +35,12 @@
             </div>
         </div>
 
+        <!-- 选课热度图表 -->
+        <div class="chart-container mb-5">
+            <h4 class="text-center mb-4">课程选课热度</h4>
+            <canvas id="enrollmentChart"></canvas>
+        </div>
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for course in courses %}
             <div class="col">
@@ -32,6 +48,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ course.name }}</h5>
                         <p class="card-text text-muted">授课教师: {{ course.teacher }}</p>
+                        <p class="text-muted small">已选人数: {{ course.enrollment_set.count }}/{{ course.capacity }}</p>
                         {% if course.id in enrolled_courses %}
                             <span class="badge enrolled-badge">✅ 已选</span>
                         {% else %}
@@ -48,6 +65,80 @@
             <a href="{% url 'logout' %}" class="btn btn-outline-secondary">退出登录</a>
         </div>
     </div>
+
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 准备图表数据
+            const courseData = {
+                labels: [{% for course in courses %}"{{ course.name }}",{% endfor %}],
+                enrollments: [{% for course in courses %}{{ course.enrollment_set.count }},{% endfor %}],
+                capacities: [{% for course in courses %}{{ course.capacity }},{% endfor %}]
+            };
+
+            // 创建图表
+            const ctx = document.getElementById('enrollmentChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: courseData.labels,
+                    datasets: [
+                        {
+                            label: '已选人数',
+                            data: courseData.enrollments,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '课程容量',
+                            data: courseData.capacities,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            type: 'line',
+                            pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '人数'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const dataIndex = context.dataIndex;
+                                    const percentage = Math.round((courseData.enrollments[dataIndex] / courseData.capacities[dataIndex]) * 100);
+                                    return `选课比例: ${percentage}%`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
